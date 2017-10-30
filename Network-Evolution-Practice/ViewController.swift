@@ -7,19 +7,31 @@
 //
 
 import UIKit
+import SwiftyJSON
+import Alamofire
 
 class ViewController: UIViewController {
 
+    @IBOutlet weak var label: UILabel!
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view, typically from a nib.
+        
+        let url = "https://httpbin.org/post"
+        let params = ["param": "turtlexuan"]
+        
+        request(url, method: .post, parameters: params).responseJSON { (response) in
+            
+            if let jsonData = response.data, response.error == nil {
+                let json = JSON(jsonData)
+                self.label.text = "Username: " + json["form"]["param"].stringValue
+            } else {
+                self.label.text = "Request failed"
+            }
+            
+        }
+        
     }
-
-    override func didReceiveMemoryWarning() {
-        super.didReceiveMemoryWarning()
-        // Dispose of any resources that can be recreated.
-    }
-
-
 }
 
