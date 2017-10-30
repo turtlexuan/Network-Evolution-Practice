@@ -21,17 +21,15 @@ class ViewController: UIViewController {
         let url = "https://httpbin.org/post"
         let params = ["param": "turtlexuan"]
         
-        request(url, method: .post, parameters: params).responseJSON { (response) in
+        NetworkClient.makeRequest(url: url, params: params) { (json, error) in
             
-            if let jsonData = response.data, response.error == nil {
-                let json = JSON(jsonData)
-                self.label.text = "Username: " + json["form"]["param"].stringValue
-            } else {
+            if error != nil {
                 self.label.text = "Request failed"
+            } else if let json = json {
+                self.label.text = "Username: " + json["form"]["param"].stringValue
             }
             
         }
-        
     }
 }
 
