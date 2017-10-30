@@ -9,19 +9,39 @@
 import UIKit
 import SwiftyJSON
 import Alamofire
+import SnapKit
 
 class ViewController: UIViewController {
 
-    @IBOutlet weak var label: UILabel!
+    var label = UILabel()
+    var networkClient: NetworkClientType = NetworkClient()
     
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view, typically from a nib.
+        self.view.backgroundColor = .white
+        
+        self.label.text = "Requesting Username..."
+        self.view.addSubview(self.label)
+        
+        self.label.snp.makeConstraints { (make) in
+            make.center.equalTo(self.view)
+        }
+        
+        networkClient.fetchUsername { (username, error) in
+            
+            if error != nil {
+                self.label.text = "Request failed"
+            } else if let username = username {
+                self.label.text = "Username: " + username
+            }
+            
+        }
         
         let url = "https://httpbin.org/post"
         let params = ["param": "turtlexuan"]
         
-        NetworkClient.makeRequest(url: url, params: params) { (json, error) in
+        networkClient.makeRequest(url: url, params: params) { (json, error) in
             
             if error != nil {
                 self.label.text = "Request failed"
