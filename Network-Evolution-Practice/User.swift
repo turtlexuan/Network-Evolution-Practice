@@ -17,7 +17,7 @@ struct User {
 extension User: JSONDecodable {
     
     init?(json: JSON) {
-        guard let name = json["form"]["param"].string else { return nil }
+        guard let name = json["json"]["param"].string else { return nil }
         self.name = name
     }
 

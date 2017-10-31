@@ -13,7 +13,7 @@ import PromiseKit
 
 protocol NetworkClientType {
 //    func fetchUsername(completionHandler: @escaping (String?, Error?) -> Void)
-    func makeRequest<Response: JSONDecodable>(url: String, params: [String: Any], completionHandler: @escaping (Response?, Error?) -> Void)
+    func makeRequest<Request: NetworkRequest>(networkRequest: Request, completionHandler: @escaping (Data?, Error?) -> Void)
 }
 
 struct NetworkClient: NetworkClientType {
@@ -37,19 +37,17 @@ struct NetworkClient: NetworkClientType {
 //        }
 //    }
     
-    func makeRequest<Response: JSONDecodable>(url: String, params: [String: Any], completionHandler: @escaping (Response?, Error?) -> Void) {
+    func makeRequest<Request: NetworkRequest>(networkRequest: Request, completionHandler: @escaping (Data?, Error?) -> Void) {
         
-        request(url, method: .post, parameters: params).responseJSON { (response) in
+        request(networkRequest.url, method: networkRequest.method, parameters: networkRequest.parameters, encoding: networkRequest.encoding, headers: networkRequest.headers).responseJSON { (response) in
             
             if let error = response.error {
                 completionHandler(nil, error)
                 return
             }
             
-            if let jsonData = response.data, response.error == nil {
-                let json = JSON(jsonData)
-                let response = Response(json: json)
-                completionHandler(response, nil)
+            if let data = response.data, response.error == nil {
+                completionHandler(data, nil)
             }
         }
     }

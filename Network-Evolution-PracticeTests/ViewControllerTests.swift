@@ -24,34 +24,32 @@ class ViewControllerTests: XCTestCase {
 extension ViewControllerTests {
     
     func testSuccessNetworkResponseShowUsername() {
-        viewController.networkClient = MockSuccessNetworkClient()
+        viewController.fetchUser = MockSuccessFetchUser()
         viewController.loadViewIfNeeded()
         XCTAssertEqual(viewController.label.text, "Username: turtlexuan")
     }
     
     func testFailureNetworkResponseShowUsername() {
-        viewController.networkClient = MockFailureNetworkClient()
+        viewController.fetchUser = MockFailureFetchUser()
         viewController.loadViewIfNeeded()
         XCTAssertEqual(viewController.label.text, "Request failed")
     }
     
 }
 
-private struct MockSuccessNetworkClient: NetworkClientType {
+private class MockSuccessFetchUser: FetchUser {
     
-    func makeRequest<Response: JSONDecodable>(url: String, params: [String : Any], completionHandler: @escaping (Response?, Error?) -> Void) {
-        let json = JSON(["form": ["param": "turtlexuan"]])
-        let response = Response(json: json)
-        completionHandler(response, nil)
+    fileprivate override func perform(username: String, completionHandler: @escaping (User?, Error?) -> Void) {
+        let user = User(name: username)
+        completionHandler(user, nil)
     }
  }
 
-private struct MockFailureNetworkClient: NetworkClientType {
+private class MockFailureFetchUser: FetchUser {
     
-    fileprivate func makeRequest<Response: JSONDecodable>(url: String, params: [String : Any], completionHandler: @escaping (Response?, Error?) -> Void) {
+    fileprivate override func perform(username: String, completionHandler: @escaping (User?, Error?) -> Void) {
         completionHandler(nil, NSError(domain: "", code: -1, userInfo: nil))
     }
-    
     
 }
 
