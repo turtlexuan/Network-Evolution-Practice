@@ -39,15 +39,16 @@ extension ViewControllerTests {
 
 private struct MockSuccessNetworkClient: NetworkClientType {
     
-    fileprivate func makeRequest(url: String, params: [String : Any], completionHandler: @escaping (JSON?, Error?) -> Void) {
+    func makeRequest<Response: JSONDecodable>(url: String, params: [String : Any], completionHandler: @escaping (Response?, Error?) -> Void) {
         let json = JSON(["form": ["param": "turtlexuan"]])
-        completionHandler(json, nil)
+        let response = Response(json: json)
+        completionHandler(response, nil)
     }
-}
+ }
 
 private struct MockFailureNetworkClient: NetworkClientType {
     
-    fileprivate func makeRequest(url: String, params: [String : Any], completionHandler: @escaping (JSON?, Error?) -> Void) {
+    fileprivate func makeRequest<Response: JSONDecodable>(url: String, params: [String : Any], completionHandler: @escaping (Response?, Error?) -> Void) {
         completionHandler(nil, NSError(domain: "", code: -1, userInfo: nil))
     }
     
