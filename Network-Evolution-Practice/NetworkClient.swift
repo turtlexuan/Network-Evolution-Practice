@@ -12,43 +12,31 @@ import SwiftyJSON
 import PromiseKit
 
 protocol NetworkClientType {
-//    func fetchUsername(completionHandler: @escaping (String?, Error?) -> Void)
-    func makeRequest<Request: NetworkRequest>(networkRequest: Request, completionHandler: @escaping (Data?, Error?) -> Void)
+    func performRequest<Request: NetworkRequest>(networkRequest: Request) -> Promise<Data>
 }
 
 struct NetworkClient: NetworkClientType {
     
-//    func fetchUsername(completionHandler: @escaping (String?, Error?) -> Void) {
-//
-//        let url = "https://httpbin.org/post"
-//        let params = ["param": "turtlexuan"]
-//
-//        makeRequest(url: url, params: params) { (json, error) in
-//
-//            if error != nil {
-//                completionHandler(nil, error)
-//                return
-//            }
-//
-//            if let json = json {
-//                let username = json["form"]["param"].string
-//                completionHandler(username, nil)
-//            }
-//        }
-//    }
-    
-    func makeRequest<Request: NetworkRequest>(networkRequest: Request, completionHandler: @escaping (Data?, Error?) -> Void) {
+    func performRequest<Request: NetworkRequest>(networkRequest: Request) -> Promise<Data> {
         
-        request(networkRequest.url, method: networkRequest.method, parameters: networkRequest.parameters, encoding: networkRequest.encoding, headers: networkRequest.headers).responseJSON { (response) in
+        let (promise, success, failure) = Promise<Data>.pending()
+        
+        request(networkRequest.url,
+                method: networkRequest.method,
+                parameters: networkRequest.parameters,
+                encoding: networkRequest.encoding,
+                headers: networkRequest.headers).responseJSON { (response) in
             
             if let error = response.error {
-                completionHandler(nil, error)
+                failure(error)
                 return
             }
             
             if let data = response.data, response.error == nil {
-                completionHandler(data, nil)
+                success(data)
             }
         }
+        
+        return promise
     }
 }

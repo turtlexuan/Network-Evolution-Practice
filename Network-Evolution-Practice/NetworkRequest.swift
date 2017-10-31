@@ -10,12 +10,16 @@ import Foundation
 import Alamofire
 import SwiftyJSON
 
+enum JSONError: Error {
+    case MissingKey(String)
+}
+
 protocol NetworkRequest {
     associatedtype ResponseType
     
     // Required
     var endPoint: String { get }
-    var responseHandler: (Data) -> ResponseType? { get }
+    var responseHandler: (Data) throws -> ResponseType { get }
     
     // Optional
     var baseURL: String { get }
@@ -42,10 +46,10 @@ extension NetworkRequest {
 }
 
 extension NetworkRequest where ResponseType: JSONDecodable {
-    var responseHandler: (Data) -> ResponseType? { return jsonResponseHandler }
+    var responseHandler: (Data) throws -> ResponseType { return jsonResponseHandler }
 }
 
-private func jsonResponseHandler<Response: JSONDecodable>(data: Data) -> Response? {
+private func jsonResponseHandler<Response: JSONDecodable>(data: Data) throws -> Response {
     let json = JSON(data: data)
-    return Response(json: json)
+    return try Response(json: json)
 }

@@ -9,6 +9,7 @@
 @testable import Network_Evolution_Practice
 import XCTest
 import SwiftyJSON
+import PromiseKit
 
 class ViewControllerTests: XCTestCase {
     
@@ -26,29 +27,42 @@ extension ViewControllerTests {
     func testSuccessNetworkResponseShowUsername() {
         viewController.fetchUser = MockSuccessFetchUser()
         viewController.loadViewIfNeeded()
-        XCTAssertEqual(viewController.label.text, "Username: turtlexuan")
+        
+        let expectations = expectation(description: "Label set")
+        DispatchQueue.main.asyncAfter(deadline: .now() + 10) {
+            XCTAssertEqual(self.viewController.label.text, "Username: turtlexuan")
+            expectations.fulfill()
+        }
+        waitForExpectations(timeout: 10, handler: nil)
+        
     }
     
     func testFailureNetworkResponseShowUsername() {
         viewController.fetchUser = MockFailureFetchUser()
         viewController.loadViewIfNeeded()
-        XCTAssertEqual(viewController.label.text, "Request failed")
+        
+        let expectations = expectation(description: "Label set")
+        DispatchQueue.main.asyncAfter(deadline: .now() + 10) {
+            XCTAssertEqual(self.viewController.label.text, "Request failed")
+            expectations.fulfill()
+        }
+        waitForExpectations(timeout: 10, handler: nil)
+        
     }
     
 }
 
 private class MockSuccessFetchUser: FetchUser {
     
-    fileprivate override func perform(username: String, completionHandler: @escaping (User?, Error?) -> Void) {
-        let user = User(name: username)
-        completionHandler(user, nil)
+    fileprivate override func perform(username: String) -> Promise<User> {
+        return Promise(value: User(name: username))
     }
  }
 
 private class MockFailureFetchUser: FetchUser {
     
-    fileprivate override func perform(username: String, completionHandler: @escaping (User?, Error?) -> Void) {
-        completionHandler(nil, NSError(domain: "", code: -1, userInfo: nil))
+    fileprivate override func perform(username: String) -> Promise<User> {
+        return Promise(error: NSError(domain: "", code: -1, userInfo: nil))
     }
     
 }

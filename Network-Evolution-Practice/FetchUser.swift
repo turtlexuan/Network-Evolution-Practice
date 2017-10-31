@@ -9,6 +9,7 @@
 import Foundation
 import Alamofire
 import SwiftyJSON
+import PromiseKit
 
 class FetchUser: NetworkRequest {
     typealias ResponseType = User
@@ -19,15 +20,9 @@ class FetchUser: NetworkRequest {
     
     private var username: String = ""
     
-    func perform(username: String, completionHandler: @escaping (User?, Error?) -> Void) {
+    func perform(username: String) -> Promise<User> {
         
         self.username = username
-        let parseCallback = { (data: Data?, error: Error?) in
-            
-            let response = data.flatMap(self.responseHandler)
-            completionHandler(response, error)
-        }
-        
-        networkClient.makeRequest(networkRequest: self, completionHandler: parseCallback)
+        return networkClient.performRequest(networkRequest: self).then(execute: responseHandler)
     }
 }

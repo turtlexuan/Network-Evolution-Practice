@@ -28,14 +28,23 @@ class ViewController: UIViewController {
             make.center.equalTo(self.view)
         }
         
-        fetchUser.perform(username: "turtlexuan") { (user, error) in
-            
-            if error != nil {
-                self.label.text = "Request failed"
-            } else if let user = user {
+        fetchUser.perform(username: "turtlexuan")
+            .then { (user) in
                 self.label.text = "Username: " + user.name
             }
-        }
+            .catch(execute: { (error) in
+                self.label.text = "Request failed"
+            })
+        
+//
+//        fetchUser.perform(username: "turtlexuan") { (user, error) in
+//
+//            if error != nil {
+//                self.label.text = "Request failed"
+//            } else if let user = user {
+//                self.label.text = "Username: " + user.name
+//            }
+//        }
     }
 }
 
